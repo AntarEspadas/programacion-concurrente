@@ -1,0 +1,1 @@
+ps -e -o pid,cmd --no-headers | awk -v name=$1 '$2 ~ name {print $1; exit}' | xargs pstree -c -p
