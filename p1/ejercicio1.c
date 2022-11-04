@@ -4,7 +4,7 @@
 #include <sys/wait.h>
 
 #define N 7
-#define DELAY 5
+#define DELAY 1
 
 int main()
 {
