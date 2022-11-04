@@ -16,11 +16,11 @@ int main()
 
     for (i = 0; i < n; i++)
     {
-        if (!fork())
-        {
-            i = -1;
-            n = n - 1;
-        }
+        if (fork())
+            continue;
+
+        i = -1;
+        n = n - 1;
     }
 
     for (i = 0; i < n; i++)
