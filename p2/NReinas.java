@@ -4,15 +4,17 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class NReinas1 implements Callable<Integer> {
-  public static final int N = 25;
+public class NReinas implements Callable<Integer> {
+  public static final int N = 18;
 
+  private int id;
   private int n;
-  private int c;
+  private int h;
 
-  public NReinas1(int n, int c) {
+  public NReinas(int id, int n, int h) {
+    this.id = id;
     this.n = n;
-    this.c = c;
+    this.h = h;
   }
 
   public static boolean esComida(int[][] tablero, int r, int c) {
@@ -72,20 +74,31 @@ public class NReinas1 implements Callable<Integer> {
 
   @Override
   public Integer call() {
-    var tablero = new int[n][n];
-    tablero[0][c] = 1;
-    return backtrackReinas(tablero, 1);
+    // int tam = n / h;
+
+    int total = 0;
+
+    for (int c = id; c < n; c += h) {
+      var tablero = new int[n][n];
+
+      tablero[0][c] = 1;
+      total += backtrackReinas(tablero, 1);
+    }
+
+    return total;
   }
 
   public static void main(String[] arg) throws InterruptedException, ExecutionException {
 
     int total = 0;
 
+    int h = 17;
+
     var pool = Executors.newFixedThreadPool(N);
     var resultados = new ArrayList<Future<Integer>>(N);
 
-    for (int c = 0; c < N; c++) {
-      var callable = new NReinas1(N, c);
+    for (int i = 0; i < h; i++) {
+      var callable = new NReinas(i, N, h);
       resultados.add(pool.submit(callable));
     }
 
@@ -94,6 +107,8 @@ public class NReinas1 implements Callable<Integer> {
     }
 
     System.out.println("Total: " + total);
+
+    pool.shutdown();
 
     // if (total > 0) {
 

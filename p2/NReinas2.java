@@ -1,5 +1,8 @@
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Stack;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class Datos {
 
@@ -14,9 +17,17 @@ class Datos {
 
 public class NReinas2 implements Runnable {
 
-    static final int N = 10;
+    static final int N = 15;
 
-    public static boolean esComida(int[] reinas, int columna) {
+    private static AtomicInteger total = new AtomicInteger(0);
+
+    public BlockingQueue<Datos> cola;
+
+    public NReinas2(BlockingQueue<Datos> cola) {
+        this.cola = cola;
+    }
+
+    private static boolean esComida(int[] reinas, int columna) {
         int x1 = columna;
         int y1 = reinas[x1];
 
@@ -30,42 +41,59 @@ public class NReinas2 implements Runnable {
         return false;
     }
 
-    public static int backtrackReinas(int[] reinas, int columna) {
-        int totalSoluciones = 0;
+    private void backtrackReinas(int[] reinas, int columna) throws InterruptedException {
 
-        var stack = new Stack<Datos>();
+        if (columna == reinas.length) {
+            // System.out.println(total.incrementAndGet());
+            total.incrementAndGet();
+            return;
+        }
 
-        stack.push(new Datos(reinas, columna));
-
-        while (!stack.isEmpty()) {
-            var actual = stack.pop();
-            reinas = actual.reinas;
-            columna = actual.colulmna;
-
-            if (columna == reinas.length) {
-                totalSoluciones += 1;
+        for (int fila = 0; fila < reinas.length; fila++) {
+            reinas[columna] = fila;
+            if (esComida(reinas, columna))
                 continue;
-            }
 
-            for (int fila = 0; fila < reinas.length; fila++) {
-                var reinas2 = Arrays.copyOf(reinas, reinas.length);
-                reinas2[columna] = fila;
-                if (!esComida(reinas2, columna))
-                    stack.push(new Datos(reinas2, columna + 1));
+            var datos = new Datos(Arrays.copyOf(reinas, reinas.length), columna + 1);
+            if (!cola.offer(datos)) {
+                backtrackReinas(reinas, columna + 1);
             }
         }
-        return totalSoluciones;
     }
 
     @Override
     public void run() {
-        // TODO Auto-generated method stub
-
+        try {
+            while (true) {
+                var datos = cola.take();
+                backtrackReinas(datos.reinas, datos.colulmna);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public static void main(String[] args) {
-        var reinas = new int[N];
-        int total = backtrackReinas(reinas, 0);
+    public static void main(String[] args) throws InterruptedException {
+
+        int h = 12;
+
+        var datos = new Datos(new int[N], 0);
+
+        var cola = new LinkedBlockingDeque<Datos>(h);
+        cola.push(datos);
+
+        var hilos = new ArrayList<Thread>(h);
+        for (int i = 0; i < h; i++) {
+
+            var thread = new Thread(new NReinas2(cola));
+            thread.start();
+            hilos.add(thread);
+        }
+
+        for (var hilo : hilos) {
+            hilo.join();
+        }
+
         System.out.println("Total: " + total);
     }
 }
