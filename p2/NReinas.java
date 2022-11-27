@@ -5,7 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class NReinas implements Callable<Integer> {
-  public static final int N = 18;
+  public static final int N = 15;
 
   private int id;
   private int n;
@@ -74,7 +74,6 @@ public class NReinas implements Callable<Integer> {
 
   @Override
   public Integer call() {
-    // int tam = n / h;
 
     int total = 0;
 
@@ -88,11 +87,23 @@ public class NReinas implements Callable<Integer> {
     return total;
   }
 
-  public static void main(String[] arg) throws InterruptedException, ExecutionException {
+  public static void main(String[] args) throws InterruptedException, ExecutionException {
 
     int total = 0;
 
-    int h = 17;
+    if (args.length < 1) {
+      System.out.println("Falta argumento para número de hilos");
+      return;
+    }
+
+    int h;
+
+    try {
+      h = Integer.parseInt(args[0]);
+    } catch (NumberFormatException e) {
+      System.out.println(args[0] + "no es un número válido");
+      return;
+    }
 
     var pool = Executors.newFixedThreadPool(N);
     var resultados = new ArrayList<Future<Integer>>(N);
@@ -109,14 +120,5 @@ public class NReinas implements Callable<Integer> {
     System.out.println("Total: " + total);
 
     pool.shutdown();
-
-    // if (total > 0) {
-
-    // for (int c = 0; c < tablero.length; c++) {
-    // System.out.println(Arrays.toString(tablero[c]));
-
-    // }
-
-    // }
   }
 }
