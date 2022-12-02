@@ -64,8 +64,7 @@ public class ProductorConsumidor {
         int c = 1;
 
         var semaforoProductor = new Semaphore(1);
-        var semaforoConsumidor = new Semaphore(1);
-        semaforoConsumidor.drainPermits();
+        var semaforoConsumidor = new Semaphore(0);
 
         var productores = new ArrayList<Thread>(p);
         var consumidores = new ArrayList<Thread>(c);

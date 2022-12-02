@@ -85,8 +85,7 @@ public class ProductorConsumidorAlmacen {
         Queue<Integer> productos = new LinkedList<>();
 
         var semaforoProductor = new Semaphore(n);
-        var semaforoConsumidor = new Semaphore(n);
-        semaforoConsumidor.drainPermits();
+        var semaforoConsumidor = new Semaphore(0);
 
         var candado = new ReentrantLock();
 
