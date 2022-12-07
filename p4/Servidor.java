@@ -1,12 +1,11 @@
 package p4;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -23,6 +22,31 @@ public class Servidor implements Runnable {
 
     public Servidor(Socket cliente) {
         this.cliente = cliente;
+    }
+
+    static double sumar(double[] nums) {
+        double resultado = 0;
+        for (var num : nums) {
+            resultado += num;
+        }
+        return resultado;
+    }
+
+    static double multiplicar(double[] nums) {
+        double resultado = 1;
+        for (var num : nums) {
+            resultado *= num;
+        }
+        return resultado;
+    }
+
+    static double[] parse(String args) {
+        var tmpArr = args.split(",");
+        var resultado = new double[tmpArr.length];
+        for (int i = 0; i < resultado.length; i++) {
+            resultado[i] = Double.parseDouble(tmpArr[i]);
+        }
+        return resultado;
     }
 
     @Override
@@ -48,30 +72,51 @@ public class Servidor implements Runnable {
 
             while (true) {
                 var mensaje = in.readLine();
-                var tmp = mensaje.split(":", 1);
+                var tmp = mensaje.split(":", 2);
                 var comando = mensaje = tmp[0];
-                var argumento = "";
+                var argumento = new double[0];
                 if (tmp.length > 1) {
-                    argumento = tmp[1];
+                    try {
+                        argumento = parse(tmp[1]);
+                    } catch (NumberFormatException e) {
+                        out.println("Formato inválido");
+                        continue;
+                    }
                 }
 
                 System.out.println("comando = " + comando);
+                System.out.println("Argumento = " + Arrays.toString(argumento));
+
+                var resultado = "";
 
                 switch (comando) {
                     case "sumar":
-
+                        resultado = String.valueOf(sumar(argumento));
                         break;
                     case "multiplicar":
+                        resultado = String.valueOf(multiplicar(argumento));
                         break;
                     case "restar":
+                        if (argumento.length != 2) {
+                            resultado = "Se esperaban dos números, se encontraron " + argumento.length;
+                        } else {
+                            resultado = String.valueOf(argumento[0] - argumento[1]);
+                        }
                         break;
                     case "dividir":
+                        if (argumento.length != 2) {
+                            resultado = "Se esperaban dos números, se encontraron " + argumento.length;
+                        } else {
+                            resultado = String.valueOf(argumento[0] / argumento[1]);
+                        }
                         break;
-                    case "stop":
+                    case "salir":
                         break;
                     default:
                         break;
                 }
+
+                out.println(resultado);
             }
 
         } catch (Exception e) {
@@ -82,7 +127,7 @@ public class Servidor implements Runnable {
                 clientes.remove(nickname);
                 candadoClientes.unlock();
             }
-            System.out.println("Se desconectó el cliente");
+            System.out.println("Se desconectó el cliente" + nickname);
         }
     }
 
