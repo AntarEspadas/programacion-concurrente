@@ -77,7 +77,7 @@ public class Cliente {
                 }
 
                 out.println(comando + ":" + arg);
-                System.out.println("\n" + in.readLine() + "\n");
+                System.out.println("\n Resultado: " + in.readLine() + "\n");
             }
         } catch (Exception e) {
             e.printStackTrace();
